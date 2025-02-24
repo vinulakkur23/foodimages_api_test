@@ -60,13 +60,44 @@ async function saveRatings(ratings) {
 }
 
 // API Route to Get a Random Image
+//app.get("/api/image", async (req, res) => {
+//  const images = [
+//    { id: "image1.jpg", url: `https://${BUCKET_NAME}.s3.amazonaws.com/image1.jpg` },
+//    { id: "image2.jpg", url: `https://${BUCKET_NAME}.s3.amazonaws.com/image2.jpg` },
+//  ];
+//  const randomImage = images[Math.floor(Math.random() * images.length)];
+//  res.json(randomImage);
+// });
+
+// API Route to Get a Random Image (Fetch from S3)
 app.get("/api/image", async (req, res) => {
-  const images = [
-    { id: "image1.jpg", url: `https://${BUCKET_NAME}.s3.amazonaws.com/image1.jpg` },
-    { id: "image2.jpg", url: `https://${BUCKET_NAME}.s3.amazonaws.com/image2.jpg` },
-  ];
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-  res.json(randomImage);
+  try {
+    // Fetch list of images from S3 bucket
+    const data = await s3.send(new ListObjectsV2Command({ Bucket: BUCKET_NAME }));
+
+    // Filter only image files (JPG, PNG, etc.)
+    const imageKeys = data.Contents
+      .filter(item => item.Key.match(/\.(jpg|jpeg|png|gif)$/)) // Only images
+      .map(item => item.Key); // Extract file names
+
+    // If no images found, return an error
+    if (imageKeys.length === 0) {
+      return res.status(404).json({ error: "No images found in the bucket" });
+    }
+
+    // Select a random image from the bucket
+    const randomImageKey = imageKeys[Math.floor(Math.random() * imageKeys.length)];
+
+    // Return the image URL
+    res.json({
+      id: randomImageKey,
+      url: `https://${BUCKET_NAME}.s3.amazonaws.com/${randomImageKey}`,
+    });
+
+  } catch (error) {
+    console.error("Error fetching images from S3:", error);
+    res.status(500).json({ error: "Error retrieving images" });
+  }
 });
 
 // API Route to Submit a Rating
