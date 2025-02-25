@@ -84,7 +84,7 @@ async function saveRatings(ratings) {
 //    // If no images found, return an error
 //    if (imageKeys.length === 0) {
 //      return res.status(404).json({ error: "No images found in the bucket" });
-    }
+//    }
 
 //    // Select a random image from the bucket
 //    const randomImageKey = imageKeys[Math.floor(Math.random() * imageKeys.length)];
