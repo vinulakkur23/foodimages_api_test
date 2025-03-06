@@ -100,58 +100,6 @@ async function saveRatings(ratings) {
 //    res.status(500).json({ error: "Error retrieving images" });
 //  }
 //});
-<<<<<<< HEAD
-//app.get("/api/image", async (req, res) => {
-//  try {
-    // Fetch list of all images from S3
-//    const data = await s3.send(new ListObjectsV2Command({ Bucket: BUCKET_NAME }));
-//    const imageKeys = data.Contents.map(item => item.Key);
-
-    // Fetch rated images from S3 (ratings.json)
-//    const ratings = await getRatings();
-//    const ratedImages = Object.keys(ratings); // List of images that have been rated
-
-    // Filter out images that have been rated
-//    const unratedImages = imageKeys.filter(image => !ratedImages.includes(image));
-
-//    if (unratedImages.length === 0) {
-//      return res.status(404).json({ error: "No unrated images left!" });
-//    }
-
-    // Select a random unrated image
-//    const randomImageKey = unratedImages[Math.floor(Math.random() * unratedImages.length)];
-
-//    res.json({ id: randomImageKey, url: `https://${BUCKET_NAME}.s3.amazonaws.com/${randomImageKey}` });
-
-//  } catch (error) {
-//    console.error("Error fetching images from S3:", error);
-//    res.status(500).json({ error: "Error retrieving images" });
-//  }
-//});
-
-app.get("/api/image", async (req, res) => {
-  try {
-    let images = [];
-    let continuationToken = null;
-
-    // Step 1: Fetch ALL images (pagination handles >1000 images)
-    do {
-      const params = { Bucket: BUCKET_NAME, MaxKeys: 1000 };
-      if (continuationToken) params.ContinuationToken = continuationToken;
-
-      const data = await s3.send(new ListObjectsV2Command(params));
-      images = images.concat(data.Contents.map(item => item.Key));
-
-      continuationToken = data.NextContinuationToken;
-    } while (continuationToken); // Keep fetching if more pages exist
-
-    // Step 2: Fetch rated images from S3 (ratings.json)
-    const ratings = await getRatings();
-    const ratedImages = Object.keys(ratings); // List of already-rated images
-
-    // Step 3: Remove images that have been rated
-    let unratedImages = images.filter(image => !ratedImages.includes(image));
-=======
 app.get("/api/image", async (req, res) => {
   try {
     // Fetch list of all images from S3
@@ -164,22 +112,13 @@ app.get("/api/image", async (req, res) => {
 
     // Filter out images that have been rated
     const unratedImages = imageKeys.filter(image => !ratedImages.includes(image));
->>>>>>> 8a0b671423ec892c4fd7edf1c7bb227b515af0f7
 
     if (unratedImages.length === 0) {
       return res.status(404).json({ error: "No unrated images left!" });
     }
 
-<<<<<<< HEAD
-    // Step 4: Shuffle the remaining unrated images
-    unratedImages = unratedImages.sort(() => Math.random() - 0.5);
-
-    // Step 5: Select the first shuffled image
-    const randomImageKey = unratedImages[0];
-=======
     // Select a random unrated image
     const randomImageKey = unratedImages[Math.floor(Math.random() * unratedImages.length)];
->>>>>>> 8a0b671423ec892c4fd7edf1c7bb227b515af0f7
 
     res.json({ id: randomImageKey, url: `https://${BUCKET_NAME}.s3.amazonaws.com/${randomImageKey}` });
 
@@ -189,10 +128,6 @@ app.get("/api/image", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 8a0b671423ec892c4fd7edf1c7bb227b515af0f7
 // API Route to Submit a Rating
 app.post("/api/rate", async (req, res) => {
   const { imageId, rating } = req.body;
